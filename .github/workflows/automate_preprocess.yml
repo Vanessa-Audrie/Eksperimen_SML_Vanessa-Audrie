@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write 
+
 jobs:
   preprocess:
     runs-on: ubuntu-latest
@@ -13,6 +16,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python 3.12.7
         uses: actions/setup-python@v5
@@ -33,5 +38,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
 
           git add preprocessing/Sleep_health_and_lifestyle_dataset_preprocessing/*
-          git commit -m "chore: Auto preprocess sleep disorder dataset at $(date)"
-          git push
+          git diff --cached --quiet || git commit -m "chore: Auto preprocess sleep disorder dataset at $(date)"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
