@@ -7,13 +7,15 @@ def preprocess_sleep_data(df):
     df = df.copy()
 
     # Handle missing values
-    df['Sleep Disorder'] = df['Sleep Disorder'].fillna('None')
+    df['Sleep Disorder'] = df['Sleep Disorder'].fillna('No Disorder')
 
     # Pisahkan Sistol & Diastol
     bp_split = df['Blood Pressure'].str.split('/', expand=True)
     df['BP Sistol'] = bp_split[0].astype(float)
     df['BP Diastol'] = bp_split[1].astype(float)
     df = df.drop(columns=['Blood Pressure'])
+
+    df = df.drop(columns=['Person ID'])
 
     # Samakan kategori BMI
     df['BMI Category'] = df['BMI Category'].replace({'Normal Weight': 'Normal'})
@@ -32,16 +34,16 @@ def preprocess_sleep_data(df):
     X = df.drop(columns=['Sleep Disorder'])
     y = df['Sleep Disorder']
 
+    # Split train-test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y, test_size=0.2, random_state=42
+    )
+
     # Normalisasi fitur numerik
     numeric_cols = X.select_dtypes(include=['int64', 'float64']).columns
     scaler = StandardScaler()
     X_scaled = X.copy()
     X_scaled[numeric_cols] = scaler.fit_transform(X[numeric_cols])
-
-    # Split train-test
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_scaled, y, test_size=0.2, random_state=42
-    )
 
     # Gabung dan simpan 
     df_train = pd.concat([X_train, y_train], axis=1)
